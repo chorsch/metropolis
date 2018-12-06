@@ -10,7 +10,7 @@ import seaborn as sns; sns.set()
 # constant values
 # TODO: set up proper constants so that the dE is in meaningful units
 J = -1 # energy unit
-k = 0.25 # boltzmann factor
+k = 1 # boltzmann factor
 
 # colormap for seaborn
 colors = ((0.0,0.0,0.0,1.0), (0.6,0.6,0.6,1.0)) # black and grey for spin up/down
