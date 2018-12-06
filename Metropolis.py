@@ -10,7 +10,7 @@ import seaborn as sns; sns.set()
 # TODO: set up proper constants so that the dE is in meaningful units
 J = -1 # energy unit
 T = 1 # temp unit
-k = 1 # boltzmann factor
+k = 0.25 # boltzmann factor
 
 # colormap for seaborn
 colors = ((0.0,0.0,0.0,1.0), (0.6,0.6,0.6,1.0)) # black and grey for spin up/down
@@ -44,7 +44,7 @@ def deltaE(spins, i, j, l, w):
 
 
 # picks a random entry and follows the procedure to decide whether to  switch signs
-def swap_iteration(spins, energy, l, w):
+def swap_iteration(spins, energy, magnetization, l, w):
     # choose a random entry to consider
     i = np.random.randint(0, w)
     j = np.random.randint(0, l)
@@ -59,6 +59,7 @@ def swap_iteration(spins, energy, l, w):
         spins[i, j] *= -1
         energy = energy + dE
         switches += 1
+        magnetization += 2*spins[i,j]/(l*w)
 
     else:
         # pick random num between 0 and 1
@@ -71,9 +72,10 @@ def swap_iteration(spins, energy, l, w):
             spins[i, j] *= -1
             energy = energy + dE
             switches += 1
+            magnetization += 2*spins[i,j]/(l*w)
             #print("swapped")
     S.append(switches)
-    return (spins, energy)
+    return (spins, energy, magnetization)
 
 def run(dims, iterations):
     # Generate matrix, get initial conditions
@@ -94,9 +96,9 @@ def run(dims, iterations):
 
     for i in range(0, iterations):
         X.append(i)
-        (spins, energy) = swap_iteration(spins, energy, dims, dims) # swap process for random entry
+        (spins, energy, mag) = swap_iteration(spins, energy, mag, dims, dims) # swap process for random entry
         E.append(energy)
-        #M.append(magnetization(spins, spins[0].size, spins[0].size)) # TODO: add this as a piece of the swap process like energy
+        M.append(mag)
 
     # Plot final characteristics
     p3 = plt.figure(3)
@@ -119,7 +121,13 @@ def run(dims, iterations):
     plt.ylabel("swaps")
     plt.plot(X,S)
 
+    plt.figure(5)
+    plt.title("Mean Magnetization vs Iterations")
+    plt.xlabel("iterations")
+    plt.ylabel("mean magnetization")
+    plt.plot(X,M)
+
     plt.show()
 
 switches = 0
-run(100, 2000000)
+run(50, 3000000)
