@@ -16,6 +16,8 @@ k = 1 # boltzmann factor
 colors = ((0.0,0.0,0.0,1.0), (0.6,0.6,0.6,1.0)) # black and grey for spin up/down
 cm = clr.LinearSegmentedColormap.from_list('Custom', colors, len(colors))
 
+S = []
+
 # returns matrix of spins, avg magnetization, initial interaction energy
 def generate_matrix(l,w):
     spins = np.zeros((w, l))
@@ -47,6 +49,8 @@ def swap_iteration(spins, energy, l, w):
     i = np.random.randint(0, w)
     j = np.random.randint(0, l)
 
+    global switches, S
+
     # find change in energy if we were to swap it
     dE = deltaE(spins, i, j, l, w)
 
@@ -54,6 +58,7 @@ def swap_iteration(spins, energy, l, w):
     if( dE < 0 ):
         spins[i, j] *= -1
         energy = energy + dE
+        switches += 1
 
     else:
         # pick random num between 0 and 1
@@ -65,7 +70,9 @@ def swap_iteration(spins, energy, l, w):
         if( r <= P ):
             spins[i, j] *= -1
             energy = energy + dE
+            switches += 1
             #print("swapped")
+    S.append(switches)
     return (spins, energy)
 
 def run(dims, iterations):
@@ -78,7 +85,7 @@ def run(dims, iterations):
     p0 = sns.heatmap(spins, cmap=cm)
     cbar= p0.collections[0].colorbar
     cbar.set_ticks([-1,1])
-    cbar.set_ticklabels(["spin up", "spin down"])
+    cbar.set_ticklabels(["spin down", "spin up"])
 
     X = [] # iteration number for energy vs iteration plot
     E = [] # total energy per iteration
@@ -97,14 +104,22 @@ def run(dims, iterations):
     plt.xlabel("iteration")
     plt.ylabel("dE")
     plt.plot(X, E)
+    
     plt.figure(2)
-
     plt.title("Spin Distribution After " + str(iterations)  +  " Iterations")
     p2 = sns.heatmap(spins, cmap=cm)
     plt.axis('off')
     cbar= p2.collections[0].colorbar
     cbar.set_ticks([-1,1])
-    cbar.set_ticklabels(["spin up", "spin down"])
+    cbar.set_ticklabels(["spin down", "spin up"])
+
+    plt.figure(4)
+    plt.title("Total Number of Swaps")
+    plt.xlabel("iterations")
+    plt.ylabel("swaps")
+    plt.plot(X,S)
+
     plt.show()
 
-run(100, 100000)
+switches = 0
+run(100, 2000000)
